@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'vendor' => \App\Http\Middleware\EnsureIsVendor::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -13,6 +13,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public string $role = 'user';
 
     /**
      * Handle an incoming registration request.
@@ -23,6 +24,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string', 'in:user,vendor'],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -31,7 +33,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         Auth::login($user);
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        if ($user->isVendor()) {
+            $this->redirect(route('vendor.dashboard', absolute: false), navigate: true);
+        } else {
+            $this->redirect(route('dashboard', absolute: false), navigate: true);
+        }
     }
 }; ?>
 
@@ -78,6 +84,14 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 autocomplete="new-password"
                 placeholder="Confirm password"
             />
+        </div>
+
+        <!-- Role Selection -->
+        <div class="grid gap-2">
+            <flux:radio.group wire:model="role" label="Account Type" required>
+                <flux:radio value="user" label="Customer (User)" />
+                <flux:radio value="vendor" label="Vendor (Seller)" />
+            </flux:radio.group>
         </div>
 
         <div class="flex items-center justify-end">
