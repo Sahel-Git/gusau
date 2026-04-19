@@ -29,15 +29,24 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered(($user = User::create($validated))));
+        $user = User::create($validated);
+
+        if ($user->role === 'vendor') {
+            $user->store()->create([
+                'name' => $user->name . "'s Store",
+                'slug' => \Illuminate\Support\Str::slug($user->name . '-store-' . uniqid()),
+            ]);
+        }
+
+        event(new Registered($user));
 
         Auth::login($user);
 
-        if ($user->isVendor()) {
-            $this->redirect(route('vendor.dashboard', absolute: false), navigate: true);
-        } else {
-            $this->redirect(route('dashboard', absolute: false), navigate: true);
-        }
+        match ($user->role) {
+            'admin' => $this->redirect(route('admin.dashboard', absolute: false), navigate: true),
+            'vendor' => $this->redirect(route('vendor.dashboard', absolute: false), navigate: true),
+            default => $this->redirect(route('dashboard', absolute: false), navigate: true),
+        };
     }
 }; ?>
 

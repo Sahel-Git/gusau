@@ -44,12 +44,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $status = Password::reset(
             $this->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) {
-                $user->forceFill([
-                    'password' => Hash::make($this->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
-
-                event(new PasswordReset($user));
+                $user->update([
+                    'password' => Hash::make($this->password)
+                ]);
             }
         );
 

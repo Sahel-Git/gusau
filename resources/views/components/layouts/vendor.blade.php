@@ -31,21 +31,16 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group heading="Platform" class="grid">
+                <flux:navlist.group heading="Vendor Panel" class="grid">
                     <flux:navlist.item icon="globe-alt" :href="route('home')" :current="request()->routeIs('home')"
                         wire:navigate>
-                        Marketplace Home
+                        View More 
                     </flux:navlist.item>
 
                     @auth
-                        @if(auth()->user()->isVendor())
-                            <x-sidebar.vendor />
-                        @elseif(auth()->user()->isAdmin())
-                            <x-sidebar.admin />
-                        @else
-                            <x-sidebar.user />
-                        @endif
+                    <x-sidebar.vendor />
                     @endauth
+
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -191,7 +186,9 @@
         @endauth
     </flux:header>
 
-    {{ $slot }}
+     <flux:main>
+        {{ $slot }}
+    </flux:main>
 
     @fluxScripts
 </body>

@@ -39,11 +39,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        if (Auth::user()->isVendor()) {
-            $this->redirectIntended(default: route('vendor.dashboard', absolute: false), navigate: true);
-        } else {
-            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
-        }
+        $user = Auth::user();
+
+        match ($user->role) {
+            'admin' => $this->redirectIntended(default: route('admin.dashboard', absolute: false), navigate: true),
+            'vendor' => $this->redirectIntended(default: route('vendor.dashboard', absolute: false), navigate: true),
+            default => $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true),
+        };
     }
 
     /**

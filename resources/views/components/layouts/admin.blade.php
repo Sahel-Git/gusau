@@ -38,14 +38,9 @@
                     </flux:navlist.item>
 
                     @auth
-                        @if(auth()->user()->isVendor())
-                            <x-sidebar.vendor />
-                        @elseif(auth()->user()->isAdmin())
-                            <x-sidebar.admin />
-                        @else
-                            <x-sidebar.user />
-                        @endif
+                     <x-sidebar.admin />
                     @endauth
+                    
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -191,7 +186,9 @@
         @endauth
     </flux:header>
 
-    {{ $slot }}
+    <flux:main>
+        {{ $slot }}
+    </flux:main>
 
     @fluxScripts
 </body>

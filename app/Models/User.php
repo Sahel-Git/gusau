@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable // implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -24,6 +24,7 @@ class User extends Authenticatable // implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'vendor_type',
     ];
 
     /**
@@ -82,5 +83,37 @@ class User extends Authenticatable // implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is a product seller
+     */
+    public function isProductSeller(): bool
+    {
+        return $this->isVendor() && $this->vendor_type === 'product_seller';
+    }
+
+    /**
+     * Check if user is a service provider
+     */
+    public function isServiceProvider(): bool
+    {
+        return $this->isVendor() && $this->vendor_type === 'service_provider';
+    }
+
+    /**
+     * Get the store belonging to the vendor
+     */
+    public function store()
+    {
+        return $this->hasOne(Store::class);
+    }
+
+    /**
+     * Get the listings belonging to the vendor (through store)
+     */
+    public function listings()
+    {
+        return $this->hasManyThrough(Listing::class, Store::class);
     }
 }
