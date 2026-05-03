@@ -8,11 +8,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use App\Traits\HasWallet;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasWallet;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +26,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'vendor_type',
+        'status',
+        'last_login_at',
+        'wallet_balance',
     ];
 
     /**
@@ -47,6 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -67,6 +72,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    /**
+     * Check if user is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Check if user is suspended
+     */
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
     }
 
     /**

@@ -11,8 +11,14 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'store_id',
+        'payment_reference',
+        'payment_status',
         'total_amount',
         'status',
+        'delivery_fee',
+        'platform_delivery_fee',
+        'rider_fee',
     ];
 
     public function user()

@@ -16,6 +16,14 @@ class OrderItem extends Model
         'quantity',
         'price',
         'payout_status',
+        'commission_percentage',
+        'commission_amount',
+        'earnings',
+        'payout_available_at',
+    ];
+
+    protected $casts = [
+        'payout_available_at' => 'datetime',
     ];
 
     public function order()

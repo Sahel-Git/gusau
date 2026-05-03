@@ -4,13 +4,13 @@ use App\Models\Listing;
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
 
-new #[Layout('components.layouts.admin')] class extends Component
+new #[Layout('admin.layouts.app')] class extends Component
 {
     public function with()
     {
         return [
             'listings' => Listing::with(['vendor', 'category'])
-                                 ->where('status', 'pending')
+                                 ->where('listings.status', 'pending')
                                  ->latest()
                                  ->get(),
         ];
@@ -20,6 +20,11 @@ new #[Layout('components.layouts.admin')] class extends Component
     {
         $listing = Listing::findOrFail($id);
         $listing->update(['status' => 'approved']);
+        
+        if (function_exists('activity_log')) {
+            activity_log('Listing Approved', "Listing {$listing->title} (ID: {$listing->id}) was approved.");
+        }
+
         session()->flash('success', 'Listing approved successfully.');
     }
 
@@ -27,6 +32,11 @@ new #[Layout('components.layouts.admin')] class extends Component
     {
         $listing = Listing::findOrFail($id);
         $listing->update(['status' => 'rejected']);
+        
+        if (function_exists('activity_log')) {
+            activity_log('Listing Rejected', "Listing {$listing->title} (ID: {$listing->id}) was rejected.");
+        }
+
         session()->flash('success', 'Listing rejected successfully.');
     }
 }; ?>

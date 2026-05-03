@@ -3,7 +3,11 @@
 use Livewire\Volt\Component;
 
 new class extends Component {
-    //
+    public function rendering(\Illuminate\View\View $view): void
+    {
+        $role = auth()->user()->role ?? 'user';
+        $view->layout("{$role}.layouts.app");
+    }
 }; ?>
 
 <div class="flex flex-col items-start">

@@ -7,14 +7,18 @@ use function Livewire\Volt\{state, mount, layout};
 
 layout('components.layouts.app');
 
-state(['listing', 'quantity' => 1, 'processing' => false]);
+state(['listing', 'relatedListings', 'quantity' => 1, 'processing' => false]);
 
 mount(function (Listing $listing) {
-    // Only approved listings should be viewable publicly
-    if ($listing->status !== 'approved') {
+    // Only approved listings from active stores should be viewable publicly
+    if ($listing->status !== 'approved' || !$listing->store->isActive()) {
         abort(404);
     }
     $this->listing = $listing->load(['store', 'category']);
+    $this->relatedListings = \App\Models\Listing::where('category_id', $listing->category_id)
+        ->where('id', '!=', $listing->id)
+        ->take(6)
+        ->get();
 });
 
 $checkout = function (CreateOrder $createOrder) {
@@ -70,16 +74,29 @@ $checkout = function (CreateOrder $createOrder) {
             {{-- Image Gallery --}}
             <div class="flex flex-col gap-4">
                 <div class="aspect-square bg-zinc-200 dark:bg-zinc-800 rounded-3xl overflow-hidden shadow-sm relative">
-                    @if(!empty($listing->images))
-                        <img src="{{ Storage::url($listing->images[0]) }}" alt="{{ $listing->title }}" class="w-full h-full object-cover">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center text-zinc-400">No Image</div>
-                    @endif
-                    
+                    <img 
+                        id="main-product-image"
+                        src="{{ !empty($listing->images) ? Storage::url($listing->images[0]) : asset('fallback.png') }}"
+                        style="width:100%; height:100%; object-fit:cover; border-radius:10px;"
+                    >
                     <div class="absolute top-4 left-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold shadow-sm uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                         {{ $listing->type }}
                     </div>
                 </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    @foreach($listing->images ?? [] as $img)
+                        <img 
+                            src="{{ Storage::url($img) }}" 
+                            style="width:60px; height:60px; cursor:pointer; border-radius: 8px; object-fit: cover;"
+                            onclick="changeImage('{{ Storage::url($img) }}')"
+                        >
+                    @endforeach
+                </div>
+                <script>
+                function changeImage(src) {
+                    document.getElementById('main-product-image').src = src;
+                }
+                </script>
             </div>
 
             {{-- Details & Checkout --}}
@@ -114,23 +131,19 @@ $checkout = function (CreateOrder $createOrder) {
                             Out of Stock
                         </div>
                     @else
-                        <form wire:submit="checkout" class="flex flex-col sm:flex-row gap-4">
-                            @if($listing->type === 'product')
-                                <div class="w-full sm:w-32 flex-shrink-0 relative">
-                                    <label class="absolute -top-2 left-3 bg-white dark:bg-zinc-900 px-1 text-xs font-medium text-zinc-500">Qty ({{ $listing->stock }} available)</label>
-                                    <input type="number" wire:model.live="quantity" min="1" max="{{ $listing->stock }}" class="w-full h-14 rounded-2xl border-zinc-200 dark:border-zinc-700 bg-transparent text-center text-lg font-bold shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:text-white">
-                                </div>
-                            @endif
-
-                            <button type="submit" wire:loading.attr="disabled" class="w-full h-14 rounded-2xl bg-indigo-600 text-white font-bold text-lg shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2">
-                                <span wire:loading.remove>
-                                    <svg class="h-5 w-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                                    Purchase Now
-                                </span>
-                                <span wire:loading>Processing Securely...</span>
+                        <form action="{{ route('cart.add') }}" method="POST" class="flex flex-col gap-4">
+                            @csrf
+                            <input type="hidden" name="listing_id" value="{{ $listing->id }}">
+                            <button type="submit" class="w-full h-14 rounded-2xl bg-indigo-600 text-white font-bold text-lg shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:-translate-y-1 transition-all duration-300">
+                                Add to Cart
                             </button>
                         </form>
-                        @error('quantity') <span class="text-xs text-red-500 font-medium block mt-2">{{ $message }}</span> @enderror
+                        
+                        <div class="mt-4 text-center">
+                            <a href="#" onclick="alert('Proceed to checkout from cart (next phase)')" class="inline-block mt-2 text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+                                Proceed to Checkout
+                            </a>
+                        </div>
                         <p class="text-xs text-center text-zinc-400 mt-4 flex items-center justify-center gap-1">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"/></svg>
                             Secure encrypted checkout
@@ -139,5 +152,17 @@ $checkout = function (CreateOrder $createOrder) {
                 </div>
             </div>
         </div>
+
+        {{-- Related Products --}}
+        @if(!empty($relatedListings) && count($relatedListings) > 0)
+        <div class="mt-16">
+            <h2 class="text-2xl font-bold mb-6 text-zinc-900 dark:text-white">Related Products</h2>
+            <div style="display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 1rem; scrollbar-width: none;">
+                @foreach($relatedListings as $item)
+                    @include('user.partials.product-card', ['product' => $item])
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
 </div>

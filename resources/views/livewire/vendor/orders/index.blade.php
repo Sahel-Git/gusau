@@ -5,7 +5,7 @@ use Livewire\Attributes\Layout;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 
-new #[Layout('components.layouts.vendor')] class extends Component {
+new #[Layout('vendor.layouts.app')] class extends Component {
     public $filter = 'all';
 
     public function getOrdersProperty()
@@ -17,7 +17,7 @@ new #[Layout('components.layouts.vendor')] class extends Component {
 
         if ($this->filter !== 'all') {
             $query->whereHas('order', function ($q) {
-                $q->where('status', $this->filter);
+                $q->where('orders.status', $this->filter);
             });
         }
 

@@ -1,23 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-use App\Models\Category;
-use App\Models\Listing;
-
-new class extends Component {
-    public function with()
-    {
-        return [
-            'categories' => Category::latest()->take(6)->get(),
-            'latestListings' => Listing::with(['store', 'category'])
-                ->where('status', 'approved')
-                ->latest()
-                ->take(8)
-                ->get(),
-        ];
-    }
-}; ?>
-
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth dark">
 <head>
@@ -123,7 +103,7 @@ new class extends Component {
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
-                @forelse($categories as $category)
+                @forelse($categories ?? [] as $category)
                     <a href="#" class="group flex flex-col p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800/50 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:shadow-lg transition-all duration-300 items-center justify-center text-center">
                         <div class="h-16 w-16 rounded-full bg-white dark:bg-zinc-900 shadow-sm flex items-center justify-center text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
                             {{-- Placeholder generic icon since we don't have SVG per category in MVP --}}
@@ -161,7 +141,7 @@ new class extends Component {
             </div>
             
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                @forelse($latestListings as $listing)
+                @forelse($latestListings ?? [] as $listing)
                     <div class="group flex flex-col rounded-3xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden">
                             @if(!empty($listing->images))
@@ -232,7 +212,7 @@ new class extends Component {
                 @endforelse
             </div>
             
-            @if(count($latestListings) > 0)
+            @if(($latestListings ?? collect())->count() > 0)
             <div class="mt-12 text-center">
                 <a href="{{ route('register') }}" class="inline-flex items-center gap-2 rounded-full bg-zinc-900 dark:bg-white px-6 py-3 text-sm font-bold text-white dark:text-zinc-900 shadow-sm hover:-translate-y-0.5 transition-transform">
                     Sign up to see more

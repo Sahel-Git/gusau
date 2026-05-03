@@ -13,11 +13,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // ⚠️ NEVER RUN migrate:fresh IN PRODUCTION
+        // Use `php artisan migrate` for future fixes.
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            AdminSeeder::class,
+            SampleDataSeeder::class,
         ]);
     }
 }

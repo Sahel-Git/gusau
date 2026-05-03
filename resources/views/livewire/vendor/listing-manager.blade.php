@@ -10,8 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
 
-new #[Layout('components.layouts.vendor')] class extends Component
-{
+new #[Layout('vendor.layouts.app')] class extends Component {
     use WithFileUploads;
 
     public $listings = [];
@@ -49,6 +48,11 @@ new #[Layout('components.layouts.vendor')] class extends Component
 
     public function save()
     {
+        if (!auth()->user()->store->isActive()) {
+            session()->flash('error', 'Your store is currently not active. You cannot add or update listings.');
+            return;
+        }
+
         $this->validate([
             'title' => 'required|min:3|max:255',
             'description' => 'required|min:10',
@@ -112,6 +116,11 @@ new #[Layout('components.layouts.vendor')] class extends Component
     }
     public function edit($id)
     {
+        if (!auth()->user()->store->isActive()) {
+            session()->flash('error', 'Your store is currently not active. You cannot edit listings.');
+            return;
+        }
+
         $listing = auth()->user()->listings()->findOrFail($id);
         Gate::authorize('update', $listing);
         
@@ -142,6 +151,8 @@ new #[Layout('components.layouts.vendor')] class extends Component
         $listing->delete();
         $this->refreshListings();
     }
+
+
 }; ?>
 
     <div class="flex flex-col gap-6 w-full max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
@@ -160,8 +171,14 @@ new #[Layout('components.layouts.vendor')] class extends Component
         </div>
 
         @if (session()->has('success'))
-            <div class="p-4 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+            <div class="p-4 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 mb-4 text-sm">
                 {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session()->has('error'))
+            <div class="p-4 rounded-xl bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400 border border-red-200 dark:border-red-500/20 mb-4 text-sm">
+                {{ session('error') }}
             </div>
         @endif
 

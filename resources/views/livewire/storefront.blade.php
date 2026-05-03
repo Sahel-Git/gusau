@@ -8,8 +8,11 @@ layout('components.layouts.app');
 state(['store', 'listings']);
 
 mount(function (Store $store) {
+    if (!$store->isActive()) {
+        abort(404, 'Store not found or suspended.');
+    }
     $this->store = $store;
-    $this->listings = $store->listings()->where('status', 'approved')->with('category')->latest()->get();
+    $this->listings = $store->listings()->where('listings.status', 'approved')->with('category')->latest()->get();
 });
 ?>
 

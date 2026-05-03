@@ -37,15 +37,7 @@
                         Marketplace Home
                     </flux:navlist.item>
 
-                    @auth
-                        @if(auth()->user()->isVendor())
-                            <x-sidebar.vendor />
-                        @elseif(auth()->user()->isAdmin())
-                            <x-sidebar.admin />
-                        @else
-                            <x-sidebar.user />
-                        @endif
-                    @endauth
+
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -124,7 +116,7 @@
 
                     <flux:menu.separator />
 
-                    <flux:menu.item href="/settings/profile" icon="cog" wire:navigate>
+                    <flux:menu.item href="{{ route('user.settings.profile') }}" icon="cog" wire:navigate>
                         Settings
                     </flux:menu.item>
 
@@ -174,7 +166,7 @@
 
                     <flux:menu.separator />
 
-                    <flux:menu.item href="/settings/profile" icon="cog" wire:navigate>
+                    <flux:menu.item href="{{ route('user.settings.profile') }}" icon="cog" wire:navigate>
                         Settings
                     </flux:menu.item>
 

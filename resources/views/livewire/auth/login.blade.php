@@ -36,10 +36,23 @@ new #[Layout('components.layouts.auth')] class extends Component {
             ]);
         }
 
+        $user = Auth::user();
+
+        if ($user->status === 'suspended') {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been suspended.',
+            ]);
+        }
+
+        $user->update(['last_login_at' => now()]);
+
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $user = Auth::user();
+        if (function_exists('activity_log')) {
+            activity_log('User Login', "User {$user->email} logged in successfully.");
+        }
 
         match ($user->role) {
             'admin' => $this->redirectIntended(default: route('admin.dashboard', absolute: false), navigate: true),

@@ -6,7 +6,7 @@ use App\Models\OrderItem;
 use App\Models\Withdrawal;
 use Illuminate\Support\Facades\Auth;
 
-new #[Layout('components.layouts.vendor')] class extends Component {
+new #[Layout('vendor.layouts.app')] class extends Component {
     public $amount = '';
 
     public function getMetricsProperty()
@@ -16,7 +16,7 @@ new #[Layout('components.layouts.vendor')] class extends Component {
         $completedItems = OrderItem::with(['order', 'listing'])
             ->where('store_id', $storeId)
             ->whereHas('order', function ($query) {
-                $query->where('status', 'completed');
+                $query->where('orders.status', 'completed');
             })
             ->latest()
             ->get();

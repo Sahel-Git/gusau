@@ -6,7 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 
-new #[Layout('components.layouts.vendor')] class extends Component {
+new #[Layout('vendor.layouts.app')] class extends Component {
     public $order;
     public $vendorItems;
     public $vendorTotal;

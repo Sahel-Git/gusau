@@ -11,6 +11,12 @@ new class extends Component {
     public string $password = '';
     public string $password_confirmation = '';
 
+    public function rendering(\Illuminate\View\View $view): void
+    {
+        $role = auth()->user()->role ?? 'user';
+        $view->layout("{$role}.layouts.app");
+    }
+
     /**
      * Update the password for the currently authenticated user.
      */

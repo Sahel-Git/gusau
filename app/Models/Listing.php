@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Listing extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'store_id', 
@@ -25,7 +26,13 @@ class Listing extends Model
     protected $casts = [
         'images' => 'array',
         'price' => 'decimal:2',
+        'type' => 'string',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 
     public function store()
     {

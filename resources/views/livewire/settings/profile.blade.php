@@ -10,6 +10,12 @@ new class extends Component {
     public string $name = '';
     public string $email = '';
 
+    public function rendering(\Illuminate\View\View $view): void
+    {
+        $role = auth()->user()->role ?? 'user';
+        $view->layout("{$role}.layouts.app");
+    }
+
     /**
      * Mount the component.
      */

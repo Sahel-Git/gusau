@@ -7,7 +7,7 @@ use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 
-new #[Layout('components.layouts.vendor')] class extends Component {
+new #[Layout('vendor.layouts.app')] class extends Component {
     public $range = '7days';
 
     public function getMetricsProperty()
@@ -17,7 +17,7 @@ new #[Layout('components.layouts.vendor')] class extends Component {
         $vendorItems = OrderItem::with('listing')
              ->where('store_id', $storeId)
              ->whereHas('order', function ($query) {
-                 $query->where('status', 'completed');
+                 $query->where('orders.status', 'completed');
              })
              ->get();
 
@@ -28,7 +28,7 @@ new #[Layout('components.layouts.vendor')] class extends Component {
         $totalOrdersCount = Order::whereHas('items', function ($query) use ($storeId) {
                 $query->where('store_id', $storeId);
             })
-            ->where('status', 'completed')
+            ->where('orders.status', 'completed')
             ->count();
 
         $startDate = match($this->range) {
@@ -46,7 +46,7 @@ new #[Layout('components.layouts.vendor')] class extends Component {
         $recentOrdersCount = Order::whereHas('items', function ($query) use ($storeId) {
                 $query->where('store_id', $storeId);
             })
-            ->where('status', 'completed')
+            ->where('orders.status', 'completed')
             ->where('created_at', '>=', $startDate)
             ->count();
 

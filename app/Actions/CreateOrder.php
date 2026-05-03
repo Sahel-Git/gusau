@@ -23,6 +23,10 @@ class CreateOrder
         if ($listing->status !== 'approved') {
             throw ValidationException::withMessages(['listing' => 'This item is not available for purchase.']);
         }
+        
+        if (!$listing->store->isActive()) {
+            throw ValidationException::withMessages(['listing' => 'The store is currently not active.']);
+        }
 
         // 3. Validate Stock (if applicable)
         if ($listing->type === 'product') {

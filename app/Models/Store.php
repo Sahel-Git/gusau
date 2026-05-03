@@ -9,6 +9,9 @@ class Store extends Model
 {
     use HasFactory;
 
+    /**
+     * @deprecated The is_active column is deprecated in favor of the status column.
+     */
     protected $fillable = [
         'user_id',
         'name',
@@ -16,7 +19,23 @@ class Store extends Model
         'bio',
         'logo_path',
         'cover_path',
+        'status',
     ];
+
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isSuspended()
+    {
+        return $this->status === 'suspended';
+    }
 
     public function user()
     {

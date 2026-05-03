@@ -3,7 +3,7 @@
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
 
-new class extends Component {
+new #[Layout('vendor.layouts.app')] class extends Component {
     public bool $isEditing = false;
     
     public string $bank_name = '';

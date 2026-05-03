@@ -35,10 +35,15 @@ new #[Layout('components.layouts.auth')] class extends Component {
             $user->store()->create([
                 'name' => $user->name . "'s Store",
                 'slug' => \Illuminate\Support\Str::slug($user->name . '-store-' . uniqid()),
+                'status' => 'pending',
             ]);
         }
 
-        event(new Registered($user));
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Registration email failed: ' . $e->getMessage());
+        }
 
         Auth::login($user);
 

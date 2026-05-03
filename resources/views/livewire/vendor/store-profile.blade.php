@@ -5,7 +5,7 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-new class extends Component {
+new #[Layout('vendor.layouts.app')] class extends Component {
     use WithFileUploads;
 
     public bool $isEditing = false;

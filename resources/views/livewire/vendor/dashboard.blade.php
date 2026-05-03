@@ -5,7 +5,7 @@ use Livewire\Attributes\Layout;
 use App\Models\Order;
 use App\Models\OrderItem;
 
-new #[Layout('components.layouts.vendor')] class extends Component {
+new #[Layout('vendor.layouts.app')] class extends Component {
     public function with()
     {
         $user = auth()->user();
@@ -18,7 +18,7 @@ new #[Layout('components.layouts.vendor')] class extends Component {
         if ($store) {
             $orderItems = OrderItem::where('store_id', $store->id)
                 ->whereHas('order', function ($query) {
-                    $query->where('status', 'completed');
+                    $query->where('orders.status', 'completed');
                 })
                 ->get();
             
@@ -28,7 +28,7 @@ new #[Layout('components.layouts.vendor')] class extends Component {
 
             $totalSales = Order::whereHas('items', function ($query) use ($store) {
                 $query->where('store_id', $store->id);
-            })->where('status', 'completed')->count();
+            })->where('orders.status', 'completed')->count();
 
             $recentSales = OrderItem::with(['order.user', 'listing'])
                 ->where('store_id', $store->id)
@@ -38,7 +38,8 @@ new #[Layout('components.layouts.vendor')] class extends Component {
         }
 
         return [
-            'activeProducts' => $user->listings()->where('status', 'approved')->count(),
+            'store' => $store,
+            'activeProducts' => $user->listings()->where('listings.status', 'approved')->count(),
             'totalRevenue' => $totalRevenue,
             'totalSales' => $totalSales,
             'storeViews' => 0, // Placeholder until views tracking exists
@@ -48,6 +49,24 @@ new #[Layout('components.layouts.vendor')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6 w-full max-w-7xl mx-auto py-4">
+
+        @if($store && $store->isPending())
+            <div class="rounded-xl bg-amber-50 p-4 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20 flex gap-3">
+                <svg class="h-6 w-6 text-amber-600 dark:text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div>
+                    <h3 class="text-sm font-bold text-amber-800 dark:text-amber-400">Store Pending Approval</h3>
+                    <p class="text-sm text-amber-700 dark:text-amber-500 mt-1">Your store is currently under review by our team. You cannot publish listings or receive orders until approved.</p>
+                </div>
+            </div>
+        @elseif($store && $store->isSuspended())
+            <div class="rounded-xl bg-red-50 p-4 border border-red-200 dark:bg-red-500/10 dark:border-red-500/20 flex gap-3">
+                <svg class="h-6 w-6 text-red-600 dark:text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div>
+                    <h3 class="text-sm font-bold text-red-800 dark:text-red-400">Store Suspended</h3>
+                    <p class="text-sm text-red-700 dark:text-red-500 mt-1">Your store has been suspended. Listings are hidden from the marketplace and orders cannot be placed. Please contact support.</p>
+                </div>
+            </div>
+        @endif
         
         {{-- Store Header --}}
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/50 p-6 shadow-sm relative overflow-hidden">
@@ -59,8 +78,11 @@ new #[Layout('components.layouts.vendor')] class extends Component {
                 <div>
                     <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">
                         vendor Store
-                        <span class="inline-flex ml-2 items-center rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-semibold text-teal-800 dark:bg-teal-500/20 dark:text-teal-400 border border-teal-200 dark:border-teal-500/30">
-                            Active Seller
+                        <span class="inline-flex ml-2 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border 
+                            @if($store && $store->isActive()) bg-teal-100 text-teal-800 dark:bg-teal-500/20 dark:text-teal-400 border-teal-200 dark:border-teal-500/30
+                            @elseif($store && $store->isSuspended()) bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30
+                            @else bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400 border-amber-200 dark:border-amber-500/30 @endif">
+                            {{ $store ? ucfirst($store->status) : 'Unknown' }} Seller
                         </span>
                     </h1>
                     <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Here is what is happening with your store today.</p>

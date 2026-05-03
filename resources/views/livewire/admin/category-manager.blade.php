@@ -5,9 +5,9 @@ use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Str;
 
-new #[Layout('components.layouts.admin')] class extends Component {
-    public string $name = '';
-    public string $description = '';
+new #[Layout('admin.layouts.app')] class extends Component {
+    public $name;
+    public $description;
 
     public function with()
     {
@@ -16,7 +16,7 @@ new #[Layout('components.layouts.admin')] class extends Component {
         ];
     }
 
-    public function save()
+    public function store()
     {
         $this->validate([
             'name' => 'required|string|max:255',
@@ -60,16 +60,16 @@ new #[Layout('components.layouts.admin')] class extends Component {
         {{-- Create Category Form --}}
         <div class="lg:col-span-1 border dark:border-zinc-800/50 bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm h-min">
             <h2 class="text-lg font-bold mb-4">Add New Category</h2>
-            <form wire:submit="save" class="space-y-4">
+            <form wire:submit.prevent="store" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">Category Name</label>
-                    <input type="text" wire:model="name" class="w-full rounded-lg border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800">
+                    <input type="text" name="name" wire:model="name" class="w-full rounded-lg border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800">
                     @error('name') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium mb-1">Description</label>
-                    <textarea wire:model="description" rows="3" class="w-full rounded-lg border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800"></textarea>
+                    <textarea name="description" wire:model="description" rows="6" class="w-full rounded-lg border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800"></textarea>
                     @error('description') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
                 
